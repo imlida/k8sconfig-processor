@@ -2,12 +2,10 @@ package parser
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 
 	"github.com/k8sconfig-processor/pkg/utils"
 	"gopkg.in/yaml.v3"
@@ -155,34 +153,16 @@ spec:
 func (p *YAMLParser) EncodeToYAML(resources []utils.KubeResource) ([]byte, error) {
 	var resultBuf bytes.Buffer
 
+	// 遍历所有资源
 	for i, resource := range resources {
-		// 只对Deployment类型使用模板，其他类型使用通用方法
-		if resource.Kind == utils.DeploymentKind {
-			// 解析模板
-			tmpl, err := template.New("deployment").Parse(deploymentTemplate)
-			if err != nil {
-				return nil, fmt.Errorf("解析模板失败: %v", err)
-			}
-
-			// 执行模板
-			var buf bytes.Buffer
-			if err := tmpl.Execute(&buf, resource); err != nil {
-				return nil, fmt.Errorf("执行模板失败: %v", err)
-			}
-
-			resultBuf.Write(buf.Bytes())
-		} else {
-			// 对于非Deployment资源，使用常规encoding
-			var buf bytes.Buffer
-			encoder := yaml.NewEncoder(&buf)
-			encoder.SetIndent(2)
-
-			if err := encoder.Encode(resource); err != nil {
-				return nil, err
-			}
-
-			resultBuf.Write(buf.Bytes())
+		// 使用yaml.Marshal来编码资源
+		yamlData, err := yaml.Marshal(resource)
+		if err != nil {
+			return nil, err
 		}
+
+		// 将编码后的数据写入结果缓冲区
+		resultBuf.Write(yamlData)
 
 		// 除了最后一个资源外，在每个资源后添加分隔符
 		if i < len(resources)-1 {
