@@ -94,61 +94,6 @@ func (p *YAMLParser) ParseFile(filePath string) ([]utils.KubeResource, error) {
 	return resources, nil
 }
 
-// Deployment工作负载的YAML模板
-const deploymentTemplate = `apiVersion: {{.APIVersion}}
-kind: {{.Kind}}
-metadata:
-  name: {{.Metadata.Name}}
-  namespace: {{.Metadata.Namespace}}
-spec:
-{{- if .Spec.replicas}}
-  replicas: {{.Spec.replicas}}
-{{- end}}
-{{- if .Spec.selector}}
-  selector:
-    matchLabels:
-    {{- range $key, $value := .Spec.selector.matchLabels}}
-      {{$key}}: {{$value}}
-    {{- end}}
-{{- end}}
-{{- if .Spec.template}}
-  template:
-    metadata:
-      labels:
-      {{- range $key, $value := .Spec.template.metadata.labels}}
-        {{$key}}: {{$value}}
-      {{- end}}
-    spec:
-      containers:
-      {{- range .Spec.template.spec.containers}}
-      - name: {{.name}}
-        image: {{.image}}
-        {{- if .env}}
-        env:
-        {{- range .env}}
-        - name: {{.name}}
-          {{- if .value}}
-          value: {{.value}}
-          {{- end}}
-          {{- if .valueFrom}}
-          valueFrom:
-            {{- if .valueFrom.configMapKeyRef}}
-            configMapKeyRef:
-              name: {{.valueFrom.configMapKeyRef.name}}
-              key: {{.valueFrom.configMapKeyRef.key}}
-            {{- end}}
-            {{- if .valueFrom.secretKeyRef}}
-            secretKeyRef:
-              name: {{.valueFrom.secretKeyRef.name}}
-              key: {{.valueFrom.secretKeyRef.key}}
-            {{- end}}
-          {{- end}}
-        {{- end}}
-        {{- end}}
-      {{- end}}
-{{- end}}
-`
-
 // 将资源编码为YAML
 func (p *YAMLParser) EncodeToYAML(resources []utils.KubeResource) ([]byte, error) {
 	var resultBuf bytes.Buffer
