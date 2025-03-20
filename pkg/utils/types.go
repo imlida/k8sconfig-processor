@@ -63,8 +63,9 @@ type KubeResource struct {
 
 	// 元数据
 	Metadata struct {
-		Name      string `yaml:"name"`
-		Namespace string `yaml:"namespace,omitempty"`
+		Name      string            `yaml:"name"`
+		Namespace string            `yaml:"namespace,omitempty"`
+		Labels    map[string]string `yaml:"labels,omitempty"`
 	} `yaml:"metadata"`
 
 	// 规格(仅适用于工作负载)
@@ -75,4 +76,7 @@ type KubeResource struct {
 
 	// 字符串数据(用于Secret)
 	StringData map[string]string `yaml:"stringData,omitempty"`
+
+	// Secret类型
+	Type string `yaml:"type,omitempty"`
 }
