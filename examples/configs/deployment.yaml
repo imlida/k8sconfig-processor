@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: example
+  template:
+    metadata:
+      labels:
+        app: example
+    spec:
+      containers:
+      - name: app
+        image: example-app:1.0.0
+        env:
+        - name: JWT_SECRET
+        - name: PGDATABASE
+        - name: DATABASE_URL
+          value: "postgres://localhost:5432"  # 已设置value的不需处理
+        - name: API_KEY
+          valueFrom:  # 已使用valueFrom的不需处理
+            secretKeyRef:
+              name: existing-secret
+              key: api-key 
